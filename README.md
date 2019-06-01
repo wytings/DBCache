@@ -1,2 +1,2 @@
 # DBCache
-android cache with db (sqlite)
+cache data with sqlite on Android
