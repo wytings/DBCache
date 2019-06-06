@@ -1,5 +1,6 @@
 package com.wytings.dbcache
 
+import android.app.Application
 import java.lang.Exception
 import java.lang.reflect.Type
 import java.util.*
@@ -10,58 +11,31 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * @author 韦玉庭
  */
-class DBCacheMgr private constructor(private val zone: String) {
+class DBCacheMgr private constructor(zone: String) {
 
-    companion object {
-        var jsonParser: IJSONParser = EmptyJsonParser()
-            @JvmStatic
-            set(value) {
-                field = value
-            }
-
-        private val managerMap = ConcurrentHashMap<String, DBCacheMgr>()
-        @JvmStatic
-        fun obtain(zone: String): DBCacheMgr {
-            var manager = managerMap[zone]
-            if (manager == null) {
-                manager = DBCacheMgr(zone)
-                managerMap[zone] = manager
-            }
-            return manager
-        }
-    }
-
+    private val cacheZone = "$zone$SUFFIX"
 
     private fun cacheDao(): ICacheDao {
         return AbsRoomDatabase.obtain().cacheDao()
     }
 
     private fun getRealKey(key: String): String {
-        return zone + key
+        return cacheZone + key
     }
 
 
-    fun save(map: Map<String, String>?) {
+    fun save(map: Map<String, Any>?) {
         if (map.isNullOrEmpty()) {
             return
         }
         val entities = mutableListOf<CacheEntity>()
-        var i = 0
         for ((key, value) in map) {
             val cacheEntity = CacheEntity(getRealKey(key))
-            cacheEntity.value = value
+            cacheEntity.value = objectToString(value)
             cacheEntity.updateTime = System.currentTimeMillis()
-            entities[i++] = cacheEntity
+            entities.add(cacheEntity)
         }
         cacheDao().insertOrReplaceEntities(*entities.toTypedArray())
-    }
-
-    fun save(key: String, jsonObject: Any) {
-        try {
-            save(key, jsonParser.to(jsonObject))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     fun getString(key: String, defaultValue: String): String {
@@ -78,6 +52,14 @@ class DBCacheMgr private constructor(private val zone: String) {
         return value ?: defaultValue
     }
 
+    fun save(key: String, obj: Any) {
+        try {
+            save(mapOf(key to objectToString(obj)))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun <T> getObject(key: String, typeOfT: Type): T? {
         val value = getString(key, "")
         return try {
@@ -85,6 +67,14 @@ class DBCacheMgr private constructor(private val zone: String) {
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    private fun objectToString(obj: Any): String {
+        return when (obj) {
+            is Number -> obj.toString()
+            is String -> obj
+            else -> jsonParser.to(obj)
         }
     }
 
@@ -100,19 +90,43 @@ class DBCacheMgr private constructor(private val zone: String) {
     }
 
     fun getCount(): Long {
-        return cacheDao().queryNumberOfRows("$zone%")
+        return cacheDao().queryNumberOfRows("$cacheZone%")
     }
 
     fun getAll(): Map<String, String> {
-        val entities = cacheDao().queryAllEntities("$zone%")
+        val entities = cacheDao().queryAllEntities("$cacheZone%")
         val map = HashMap<String, String>(entities.size)
         for (entity in entities) {
-            map[entity.key.replaceFirst(zone.toRegex(), "")] = entity.value
+            map[entity.key.replaceFirst(cacheZone, "")] = entity.value
         }
         return map
     }
 
     fun deleteAll() {
-        cacheDao().deleteAll("$zone%")
+        cacheDao().deleteAll("$cacheZone%")
+    }
+
+
+    companion object {
+        private const val SUFFIX = "$$$"
+        private lateinit var jsonParser: IJSONParser
+
+        @JvmStatic
+        @JvmOverloads
+        fun initialize(application: Application, parser: IJSONParser = DefaultJsonParser()) {
+            AbsRoomDatabase.initialize(application)
+            jsonParser = parser
+        }
+
+        private val managerMap = ConcurrentHashMap<String, DBCacheMgr>()
+        @JvmStatic
+        fun obtain(zone: String): DBCacheMgr {
+            var manager = managerMap[zone]
+            if (manager == null) {
+                manager = DBCacheMgr(zone)
+                managerMap[zone] = manager
+            }
+            return manager
+        }
     }
 }

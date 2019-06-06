@@ -25,7 +25,7 @@ abstract class AbsRoomDatabase : RoomDatabase() {
 
         private val dataBaseMap = ConcurrentHashMap<String, AbsRoomDatabase>()
 
-        private const val DB_NAME = "cache_room.db"
+        private const val DB_NAME = "database_cache_room.db"
 
         @Volatile
         private var application: Application? = null
