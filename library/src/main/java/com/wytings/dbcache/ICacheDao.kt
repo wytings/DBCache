@@ -5,7 +5,7 @@ import androidx.room.*
 /**
  * Created by Rex.Wei on 2019/6/1.
  *
- * @author 韦玉庭
+ * @author Rex.Wei
  */
 @Dao
 interface ICacheDao {

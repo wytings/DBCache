@@ -10,9 +10,9 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Created by Rex.Wei on 2019/6/1.
+ * Created on 2019/6/1.
  *
- * @author 韦玉庭 weiyuting@bytedance.com
+ * @author Rex.Wei
  */
 
 @Database(entities = [CacheEntity::class], version = 1)

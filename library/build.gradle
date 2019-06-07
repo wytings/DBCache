@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 28
@@ -21,6 +22,17 @@ android {
         }
     }
 
+}
+
+publish {
+    userOrg = 'wytings'
+    groupId = 'com.wytings.dbcache'
+    artifactId = 'dbcache'
+    publishVersion = '1.0.0'
+    repoName = 'maven'
+    desc = 'cache data with SQLite on Android'
+    website = 'https://github.com/wytings/DBCache'
+    // command : $ ./gradlew clean build bintrayUpload -PbintrayUser=rexwei -PbintrayKey=BINTRAY_KEY -PdryRun=false
 }
 
 dependencies {

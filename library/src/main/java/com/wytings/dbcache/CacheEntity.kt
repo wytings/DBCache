@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 /**
  * Created by Rex.Wei on 2019/6/1.
  *
- * @author 韦玉庭
+ * @author Rex.Wei
  */
 @Entity(tableName = "t_cache_table")
 class CacheEntity(
