@@ -32,7 +32,7 @@ publish {
     repoName = 'maven'
     desc = 'cache data with SQLite on Android'
     website = 'https://github.com/wytings/DBCache'
-    // command : $ ./gradlew clean build bintrayUpload -PbintrayUser=rexwei -PbintrayKey=BINTRAY_KEY -PdryRun=false
+    // command : $ ./gradlew clean build bintrayUpload -PbintrayUser=BINTRAY_USER_NAME -PbintrayKey=BINTRAY_KEY -PdryRun=false
 }
 
 dependencies {
